@@ -1,22 +1,25 @@
 #include <string.h>
 #include <utility>
+#include <cstdlib>
 
 #include "shared_buffer.h"
 
 struct shared_buffer::shared {
-    char *data_;
     size_t ref_cntr_;
     size_t size_;
+    char data_[1];
 };
 
-shared_buffer::shared_buffer(size_t size)
+shared_buffer::shared_buffer(size_t data_size)
     : shared_(nullptr)
 {
-    shared_ = new shared();
-    memset(shared_, 0, sizeof(*shared_));
+    const size_t prealloced_data_size = sizeof(shared_->data_);
+    const size_t shared_size = sizeof(*shared_) - prealloced_data_size + data_size;
 
-    shared_->data_ = new char[size];
-    shared_->size_ = size;
+    shared_ = (shared*)malloc(shared_size);
+    memset(shared_, 0, shared_size);
+
+    shared_->size_ = data_size;
     shared_->ref_cntr_ = 1;
 }
 
@@ -46,8 +49,8 @@ shared_buffer::~shared_buffer()
     --shared_->ref_cntr_;
     if (shared_->ref_cntr_ != 0)
         return;
-    delete[] shared_->data_;
-    delete shared_;
+
+    free(shared_);
 }
 
 char* shared_buffer::get_data()
