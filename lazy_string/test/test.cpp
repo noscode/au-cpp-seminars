@@ -78,14 +78,11 @@ void test_lazy_string_memory_intensive()
     str_src.set_at(2, '0');
     for (lazy::lazy_string &str : strings)
     {
-        //std::cout << str << std::endl;
-        print(std::cout, str); std::cout << std::endl;
+        std::cout << str << std::endl;
     }
-    //std::cout << str_src + str_src << std::endl;
-    print(std::cout, concat(str_src, str_src)); std::cout << std::endl;
-    //std::cout << (str_src = "assign my rvalue!") << std::endl;
-    print(std::cout, str_src = "assign my rvalue!"); std::cout << std::endl;
-    print(std::cout, str_src = str_src); std::cout << std::endl;
+    std::cout << (str_src + str_src) << std::endl;
+    std::cout << (str_src = "assign my rvalue!") << std::endl;
+    std::cout << (str_src = str_src) << std::endl;
 }
 
 void test_lazy_string_utils_find()
@@ -103,6 +100,49 @@ void test_lazy_string_utils_find()
         find(test_str, "foo") == lazy::lazy_string::npos);
 }
 
+void test_lazy_string_operator_less()
+{
+    lazy::lazy_string str_test_less("abcdef");
+    const char *str_test_gt = "bcdef";
+    test("'abcdef' lazy_string is less then 'bcdef' char*",
+        str_test_less < str_test_gt);
+    test("'bcdef' char* is not less then 'abcdef' lazy_string",
+        !(str_test_gt < str_test_less));
+
+    lazy::lazy_string str_test_eq1("");
+    const char *str_test_eq2 = "";
+    test("empty lazy string is not less then '' char*",
+        !(str_test_eq1 < str_test_eq2));
+    test("'' char* is not less then empty lazy string",
+        !(str_test_eq2 < str_test_eq1));
+}
+
+void test_lazy_string_operator_pluseq()
+{
+    std::string str_ref1("plus to me!");
+    std::string str_ref2("plus me!");
+    lazy::lazy_string str_test1(str_ref1.c_str());
+    lazy::lazy_string str_test2(str_ref2.c_str());
+
+    str_ref1 += str_ref2;
+    str_test1 += str_test2;
+    str_ref1 += "";
+    str_test1 += "";
+    test("+=", !strcmp(str_ref1.c_str(), str_test1.c_str()));
+}
+
+void test_lazy_string_operator_plus()
+{
+    std::string str_ref1("plus me1!");
+    std::string str_ref2("plus me2!");
+    lazy::lazy_string str_test1(str_ref1.c_str());
+    lazy::lazy_string str_test2(str_ref2.c_str());
+
+    std::string str_ref_plus = str_ref1 + str_ref2;
+    lazy::lazy_string str_test_plus = str_test1 + str_test2;
+    test("+", !strcmp(str_ref_plus.c_str(), str_test_plus.c_str()));
+}
+
 int main()
 {
     test_lazy_string_size();
@@ -110,6 +150,9 @@ int main()
     test_lazy_string_get_at();
     test_lazy_string_c_str();
     test_lazy_string_utils_find();
+    test_lazy_string_operator_less();
+    test_lazy_string_operator_pluseq();
+    test_lazy_string_operator_plus();
     test_lazy_string_memory_intensive();
     return 0;
 }

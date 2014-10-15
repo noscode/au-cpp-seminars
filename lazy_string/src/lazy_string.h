@@ -15,16 +15,17 @@ struct lazy_string
     char get_at(size_t ix) const;
     void set_at(size_t ix, char value);
     const char* c_str() const;
+    lazy_string& operator+=(const lazy_string &src);
+
     static const size_t npos = static_cast<size_t>(-1);
 private:
-    explicit lazy_string(size_t size);
-
-    //friend std::ostream& operator<<(std::ostream& os, const lazy_string& str);
-    //friend lazy_string operator+(const lazy_string &str1, const lazy_string &str2);
-    friend void print(std::ostream& os, const lazy_string& str);
-    friend lazy_string concat(const lazy_string &str1, const lazy_string &str2);
+    explicit lazy_string(size_t buf_size);
 
     shared_buffer buf_;
 };
+
+lazy_string operator+(const lazy_string &str1, const lazy_string &str2);
+bool operator<(const lazy_string &str1, const lazy_string &str2);
+std::ostream& operator<<(std::ostream& os, const lazy_string& str);
 
 } /* namespace lazy */

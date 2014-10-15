@@ -4,8 +4,8 @@
 #include "lazy_string.h"
 namespace lazy {
 
-lazy_string::lazy_string(size_t size)
-    : buf_(size)
+lazy_string::lazy_string(size_t buf_size)
+    : buf_(buf_size)
 {}
 
 lazy_string::lazy_string(const char *src)
@@ -42,26 +42,6 @@ const char* lazy_string::c_str() const
     return buf_.get_data();
 }
 
-//std::ostream& operator<<(std::ostream& os, const lazy_string& str)
-void print(std::ostream& os, const lazy_string& str)
-{
-    for (size_t i = 0; i < str.buf_.get_size(); ++i)
-    {
-        os << str.buf_.get_data()[i];
-    }
-    //return os;
-}
-
-//lazy_string operator+(const lazy_string &str1, const lazy_string &str2)
-lazy_string concat(const lazy_string &str1, const lazy_string &str2)
-{
-    lazy_string str_concat(str1.get_size() + str2.get_size());
-    memcpy(str_concat.buf_.get_data(), str1.buf_.get_data(), str1.get_size());
-    memcpy(str_concat.buf_.get_data() + str1.get_size(), str2.buf_.get_data(), str2.get_size());
-    return str_concat;
-}
-
-// mutability
 lazy_string& lazy_string::operator=(lazy_string src)
 {
     std::swap(buf_, src.buf_);
@@ -76,4 +56,31 @@ void lazy_string::set_at(size_t ix, char value)
     buf_ = changed_buf;
 }
 
+lazy_string& lazy_string::operator+=(const lazy_string &src)
+{
+    shared_buffer changed_buf(buf_.get_size() + src.get_size() + 1);
+    memcpy(changed_buf.get_data(), buf_.get_data(), get_size());
+    strcpy(changed_buf.get_data() + get_size(), src.c_str());
+    buf_ = changed_buf;
+
+    return *this;
 }
+
+bool operator<(const lazy_string &str1, const lazy_string &str2)
+{
+    return strcmp(str1.c_str(), str2.c_str()) < 0;
+}
+
+std::ostream& operator<<(std::ostream& os, const lazy_string& str)
+{
+    return os << str.c_str();
+}
+
+lazy_string operator+(const lazy_string &str1, const lazy_string &str2)
+{
+    lazy_string str_concat(str1);
+    str_concat += str2;
+    return str_concat;
+}
+
+} //namespace lazy
