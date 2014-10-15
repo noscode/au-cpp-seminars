@@ -13,6 +13,7 @@ struct lazy_string
     size_t get_size() const;
     char get_at(size_t ix) const;
     void set_at(size_t ix, char value);
+    const char* c_str() const;
 private:
     explicit lazy_string(size_t size);
 

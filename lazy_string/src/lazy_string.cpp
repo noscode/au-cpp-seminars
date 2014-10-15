@@ -8,7 +8,7 @@ lazy_string::lazy_string(size_t size)
 {}
 
 lazy_string::lazy_string(const char *src)
-    : lazy_string(strlen(src))
+    : lazy_string(strlen(src) + 1)
 {
     memcpy(buf_.get_data(), src, buf_.get_size());
 }
@@ -23,17 +23,22 @@ lazy_string::lazy_string(lazy_string &&src)
 
 bool lazy_string::empty() const
 {
-    return buf_.get_size() == 0;
+    return buf_.get_size() == 1;
 }
 
 size_t lazy_string::get_size() const
 {
-    return buf_.get_size();
+    return buf_.get_size() - 1;
 }
 
 char lazy_string::get_at(size_t ix) const
 {
     return buf_.get_data()[ix];
+}
+
+const char* lazy_string::c_str() const
+{
+    return buf_.get_data();
 }
 
 //std::ostream& operator<<(std::ostream& os, const lazy_string& str)
