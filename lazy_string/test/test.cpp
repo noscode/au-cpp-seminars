@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-
 #include "lazy_string.h"
 
 int main()
