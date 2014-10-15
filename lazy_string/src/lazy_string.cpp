@@ -66,6 +66,16 @@ lazy_string& lazy_string::operator+=(const lazy_string &src)
     return *this;
 }
 
+lazy_string_ix_modifier lazy_string::operator[](size_t ix)
+{
+    return lazy_string_ix_modifier(*this, ix);
+}
+
+char lazy_string::operator[](size_t ix) const
+{
+    return get_at(ix);
+}
+
 bool operator<(const lazy_string &str1, const lazy_string &str2)
 {
     return strcmp(str1.c_str(), str2.c_str()) < 0;

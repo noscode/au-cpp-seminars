@@ -143,6 +143,28 @@ void test_lazy_string_operator_plus()
     test("+", !strcmp(str_ref_plus.c_str(), str_test_plus.c_str()));
 }
 
+void test_lazy_string_ix_operator()
+{
+    std::string str_ref("test assignmnet operator using me");
+    lazy::lazy_string str_test(str_ref.c_str());
+    lazy::lazy_string str_test_lazy_cp(str_test);
+
+    test("[] operator get right value", str_ref[10] == str_test_lazy_cp[10]);
+
+    str_ref[10] = 'f';
+    str_test_lazy_cp[10] = 'f';
+    test("[] operator assigns value", str_ref[10] == str_test_lazy_cp[10]);
+    test("[] operator doesn't change original string",
+        str_test[10] != str_test_lazy_cp[10]);
+
+    auto str_test_5th_element = str_test[5];
+    test("proxy modifier casts to right value",
+        str_test_5th_element == str_test.get_at(5));
+    auto str_test_5th_element_copy = str_test_5th_element;
+    test("proxy modifier copy returns the same value",
+        str_test_5th_element == str_test_5th_element_copy);
+}
+
 int main()
 {
     test_lazy_string_size();
@@ -154,5 +176,6 @@ int main()
     test_lazy_string_operator_pluseq();
     test_lazy_string_operator_plus();
     test_lazy_string_memory_intensive();
+    test_lazy_string_ix_operator();
     return 0;
 }

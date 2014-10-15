@@ -1,6 +1,10 @@
 #pragma once
 
+#include <ostream>
+
 #include "shared_buffer.h"
+#include "lazy_string_ix_modifier.h"
+
 namespace lazy {
 
 struct lazy_string
@@ -15,7 +19,10 @@ struct lazy_string
     char get_at(size_t ix) const;
     void set_at(size_t ix, char value);
     const char* c_str() const;
+
     lazy_string& operator+=(const lazy_string &src);
+    lazy_string_ix_modifier operator[](size_t ix);
+    char operator[](size_t ix) const;
 
     static const size_t npos = static_cast<size_t>(-1);
 private:

@@ -17,13 +17,19 @@ $(OUT_DIR)/run_test.sh:
 	chmod +x $@
 
 $(OUT_DIR)/test: $(TEST_DIR)/test.cpp $(SRC_DIR)/lazy_string_utils.h \
-	$(OUT_DIR)/lazy_string.o $(OUT_DIR)/shared_buffer.o
+	$(OUT_DIR)/lazy_string.o $(OUT_DIR)/shared_buffer.o \
+	$(OUT_DIR)/lazy_string_ix_modifier.o
 	g++ -I $(SRC_DIR) $(call cpp_files,$^) $(call obj_files,$^) $(CPP_FLAGS) -o $@
 
 # ========= LAZY STRING ============
 
-$(OUT_DIR)/lazy_string.o: $(SRC_DIR)/lazy_string.cpp \
-	$(SRC_DIR)/lazy_string.h $(OUT_DIR)/shared_buffer.o
+$(OUT_DIR)/lazy_string.o: $(SRC_DIR)/lazy_string.h $(SRC_DIR)/lazy_string.cpp \
+	$(SRC_DIR)/lazy_string_ix_modifier.h
+	g++ $(call cpp_files,$^) $(CPP_FLAGS) -c -o $@
+
+$(OUT_DIR)/lazy_string_ix_modifier.o: \
+	$(SRC_DIR)/lazy_string_ix_modifier.h $(SRC_DIR)/lazy_string_ix_modifier.cpp \
+	$(SRC_DIR)/lazy_string.h
 	g++ $(call cpp_files,$^) $(CPP_FLAGS) -c -o $@
 
 $(OUT_DIR)/shared_buffer.o: $(SRC_DIR)/shared_buffer.cpp $(SRC_DIR)/shared_buffer.h
