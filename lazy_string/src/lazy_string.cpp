@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "lazy_string.h"
+namespace lazy {
 
 lazy_string::lazy_string(size_t size)
     : buf_(size)
@@ -73,4 +74,6 @@ void lazy_string::set_at(size_t ix, char value)
     memcpy(changed_buf.get_data(), buf_.get_data(), buf_.get_size());
     changed_buf.get_data()[ix] = value;
     buf_ = changed_buf;
+}
+
 }

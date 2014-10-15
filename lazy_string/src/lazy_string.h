@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shared_buffer.h"
+namespace lazy {
 
 struct lazy_string
 {
@@ -14,6 +15,7 @@ struct lazy_string
     char get_at(size_t ix) const;
     void set_at(size_t ix, char value);
     const char* c_str() const;
+    static const size_t npos = static_cast<size_t>(-1);
 private:
     explicit lazy_string(size_t size);
 
@@ -24,3 +26,5 @@ private:
 
     shared_buffer buf_;
 };
+
+} /* namespace lazy */

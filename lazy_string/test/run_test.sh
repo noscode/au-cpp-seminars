@@ -1,2 +1,2 @@
 #!/bin/bash
-valgrind ./test
+valgrind --leak-check=full ./test
