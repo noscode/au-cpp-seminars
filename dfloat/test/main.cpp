@@ -7,6 +7,7 @@ static void write_ddouble(const imprecise::ddouble& val)
 {
     std::ofstream file("/tmp/ddouble.txt");
     file << val;
+    file << val;
 }
 
 static imprecise::ddouble read_ddouble()

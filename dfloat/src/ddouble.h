@@ -22,7 +22,6 @@ struct ddouble
     ddouble& operator-=(const ddouble& rhs);
     ddouble& operator*=(const ddouble& rhs);
     ddouble& operator/=(const ddouble& rhs);
-    ddouble operator-();
 
 private:
     double val_;
@@ -35,6 +34,7 @@ ddouble operator+(const ddouble& lhs, const ddouble& rhs);
 ddouble operator-(const ddouble& lhs, const ddouble& rhs);
 ddouble operator*(const ddouble& lhs, const ddouble& rhs);
 ddouble operator/(const ddouble& lhs, const ddouble& rhs);
+ddouble operator-(const ddouble &src);
 
 bool operator<(const ddouble& lhs, const ddouble& rhs);
 bool operator<=(const ddouble& lhs, const ddouble& rhs);

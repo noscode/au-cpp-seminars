@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 
 #include "ddouble.h"
 
@@ -8,18 +9,16 @@ namespace imprecise
 constexpr double ddouble::NUM_REPRESENT_DELTA;
 
 ddouble::ddouble()
-    : val_(0.0)
-    , dv_(0.0)
+    : ddouble(0.0)
 {}
 
 ddouble::ddouble(double value)
-    : val_(value)
-    , dv_(value * NUM_REPRESENT_DELTA)
+    : ddouble(value, 0.0)
 {}
 
 ddouble::ddouble(double value, double delta)
     : val_(value)
-    , dv_(std::max(delta, value * NUM_REPRESENT_DELTA))
+    , dv_(std::max(delta, std::abs(value * NUM_REPRESENT_DELTA)))
 {}
 
 float ddouble::get_value() const
@@ -62,10 +61,10 @@ ddouble& ddouble::operator/=(const ddouble& rhs)
     return *this;
 }
 
-ddouble ddouble::operator-()
+ddouble operator-(const ddouble &src)
 {
-    val_ = -val_;
-    return *this;
+    ddouble new_val(-src.get_value(), src.get_delta());
+    return new_val;
 }
 
 ddouble operator+(const ddouble& lhs, const ddouble& rhs)
@@ -110,7 +109,7 @@ bool operator==(const ddouble& lhs, const ddouble& rhs)
     double maxl = lhs.get_value() + lhs.get_delta();
     double minr = rhs.get_value() - rhs.get_delta();
     double maxr = rhs.get_value() + rhs.get_delta();
-    return minl <= maxr || maxl >= minr;
+    return ((minl <= minr) && (minr <= maxl)) || ((minl <= maxr) && (maxr <= maxl));
 }
 
 bool operator>(const ddouble& lhs, const ddouble& rhs)
@@ -125,16 +124,16 @@ bool operator>=(const ddouble& lhs, const ddouble& rhs)
 
 std::ostream& operator<<(std::ostream &out, const ddouble& what)
 {
-    out << what.get_value() << " " << what.get_delta();
+    out << what.get_value() << " " << what.get_delta() << " ";
     return out;
 }
 
 std::istream& operator>>(std::istream &in, ddouble& where)
 {
     double value, delta;
-    in >> value >> delta;
-    ddouble restored(value, delta);
-    where = restored;
+    char ch;
+    in >> value >> ch >> delta >> ch;
+    where = ddouble(value, delta);
     return in;
 }
 
