@@ -37,6 +37,12 @@ void my_ostream_destroy(my_ostream *thiz)
     (void)thiz;
 }
 
+void my_ostream_delete(my_ostream* thiz)
+{
+    my_ostream_destroy(thiz);
+    free(thiz);
+}
+
 my_ostream& operator<<(my_ostream &out, int i)
 {
     out.vtable->print_int(&out, i);

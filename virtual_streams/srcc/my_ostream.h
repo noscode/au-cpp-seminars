@@ -20,9 +20,18 @@ struct my_ostream
     my_ostream_vtable *vtable;
 };
 
-void my_ostream_init(my_ostream *thiz);
-void my_ostream_destroy(my_ostream *thiz);
-
 my_ostream& operator<<(my_ostream &out, int i);
 my_ostream& operator<<(my_ostream &out, double d);
 my_ostream& operator<<(my_ostream &out, const char *str);
+
+/*
+ * Required auxilary functions
+ */
+//Protected constructor
+void my_ostream_init(my_ostream *thiz);
+//No operator new - class is abstract
+//Copy constructors and assignment operators are ommited
+//Protected not virtual destructor to demonstrate problems we get with it
+void my_ostream_destroy(my_ostream *thiz);
+//Operator delete
+void my_ostream_delete(my_ostream* thiz);

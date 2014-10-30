@@ -1,7 +1,8 @@
 #include <cstddef>
+#include <cstdlib>
 #include "my_ostream_file.h"
 
-static my_ostream_file* downcast(my_ostream *thiz)
+my_ostream_file* downcast(my_ostream *thiz)
 {
     char *ostream_char = reinterpret_cast<char*>(thiz);
     char *ostream_file_char =
@@ -57,4 +58,19 @@ void my_ostream_file_init(my_ostream_file *thiz, const char* path)
     thiz->ostream.vtable = &my_ostream_vtable_inst;
     thiz->vtable = &my_ostream_file_vtable_inst;
     thiz->file_ = fopen(path, "w");
+}
+
+
+my_ostream_file* my_ostream_file_new(const char* path)
+{
+    my_ostream_file *thiz =
+        (my_ostream_file*)malloc(sizeof(*thiz));
+    my_ostream_file_init(thiz, path);
+    return thiz;
+}
+
+void my_ostream_file_delete(my_ostream_file *thiz)
+{
+    my_ostream_file_destroy(thiz);
+    free(thiz);
 }

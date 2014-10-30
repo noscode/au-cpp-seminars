@@ -1,13 +1,22 @@
 #include "my_ostream_file.h"
 
-int main()
+static void finish_work_with_ostream(my_ostream *out)
 {
-    my_ostream_file cout_;
-    my_ostream_file_init(&cout_, "ccout.txt");
-    my_ostream &cout = *my_ostream_file_upcast(&cout_);
-
-    cout << "Hello from C++ to pure C world!" << "\n"
+    *out << "Hello from C++ to pure C world!" << "\n"
         << "This is int: " << 777 << "\n"
         << "This is double: " << 777.777 << "\n";
+    //Compiler calls non-virtual destructor declared in my_ostream
+    my_ostream_delete(out);
+}
+
+int main()
+{
+    //Or my_ostream_file out_derived;
+    my_ostream_file *out_derived =
+        my_ostream_file_new("ccout.txt");
+    my_ostream *out_base = my_ostream_file_upcast(out_derived);
+
+    finish_work_with_ostream(out_base);
+    //my_ostream_file_delete(out_derived);
     return 0;
 }
