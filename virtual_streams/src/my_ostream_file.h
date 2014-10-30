@@ -10,7 +10,7 @@ struct my_ostream_file : my_ostream
     void print(double d) override;
     void print(const std::string &str) override;
 
-    virtual ~my_ostream_file();
+    ~my_ostream_file() override;
 protected:
     my_ostream_file(const my_ostream_file &src);
     my_ostream_file& operator=(const my_ostream_file& src);

@@ -17,3 +17,8 @@ my_ostream& operator<<(my_ostream &out, const std::string &str)
     out.print(str);
     return out;
 }
+
+my_ostream::~my_ostream()
+{
+    //Nothing to destroy
+}
