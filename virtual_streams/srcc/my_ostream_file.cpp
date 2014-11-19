@@ -2,8 +2,12 @@
 #include <cstdlib>
 #include "my_ostream_file.h"
 
+const type_id MY_OSTREAM_FILE_TYPE_ID = 2;
+//dynamic_cast<>
 my_ostream_file* downcast(my_ostream *thiz)
 {
+    if (thiz->vtable->id != MY_OSTREAM_FILE_TYPE_ID)
+        return NULL;
     char *ostream_char = reinterpret_cast<char*>(thiz);
     char *ostream_file_char =
         ostream_char - offsetof(my_ostream_file, ostream);
@@ -36,8 +40,6 @@ static void my_ostream_file_destroy(my_ostream_file *thiz)
     my_ostream_destroy(&thiz->ostream);
 }
 
-const type_id MY_OSTREAM_FILE_TYPE_ID = 2;
-
 static my_ostream_vtable my_ostream_vtable_inst =
 {
     MY_OSTREAM_FILE_TYPE_ID,
@@ -56,7 +58,10 @@ void my_ostream_file_init(my_ostream_file *thiz, const char* path)
 {
     my_ostream_init(&thiz->ostream);
     thiz->ostream.vtable = &my_ostream_vtable_inst;
+    //
     thiz->vtable = &my_ostream_file_vtable_inst;
+    //initializer list
+    //constr C++
     thiz->file_ = fopen(path, "w");
 }
 

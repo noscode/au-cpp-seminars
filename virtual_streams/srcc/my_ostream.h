@@ -34,4 +34,4 @@ void my_ostream_init(my_ostream *thiz);
 //Protected not virtual destructor to demonstrate problems we get with it
 void my_ostream_destroy(my_ostream *thiz);
 //Operator delete
-void my_ostream_delete(my_ostream* thiz);
+void my_ostream_delete(my_ostream *thiz);

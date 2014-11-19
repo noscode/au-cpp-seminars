@@ -7,6 +7,7 @@ static void finish_work_with_ostream(my_ostream *out)
         << "This is double: " << 777.777 << "\n";
     //Compiler calls non-virtual destructor declared in my_ostream
     my_ostream_delete(out);
+    //out->vtable->destroy(out);
 }
 
 int main()

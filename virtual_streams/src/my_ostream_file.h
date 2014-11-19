@@ -4,7 +4,7 @@
 
 struct my_ostream_file : my_ostream
 {
-    my_ostream_file(const char *path);
+    explicit my_ostream_file(const char *path);
 
     void print(int i) override;
     void print(double d) override;

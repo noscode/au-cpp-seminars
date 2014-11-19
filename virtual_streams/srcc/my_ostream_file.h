@@ -11,7 +11,7 @@ struct my_ostream_file_vtable
     my_ostream_file_destroy_func destroy;
 };
 
-struct my_ostream_file
+struct my_ostream_file //: my_ostream
 {
     my_ostream_file_vtable *vtable;
     my_ostream ostream;
