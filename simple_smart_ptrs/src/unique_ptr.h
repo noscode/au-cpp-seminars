@@ -18,7 +18,10 @@ unique_ptr<T>::unique_ptr(unique_ptr<T> &&src)
 template<typename T>
 unique_ptr<T>& unique_ptr<T>::operator=(unique_ptr<T> &&src)
 {
-    (*this).reset();
-    swap(*this, src);
+    if ((*this).get() != src.get())
+    {
+        (*this).reset();
+        swap(*this, src);
+    }
     return *this;
 }
