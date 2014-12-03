@@ -9,5 +9,4 @@ struct pimpl_example
 private:
     struct pimpl;
     shared_ptr<pimpl> pimpl_ptr_;
-    static void pimpl_deleter(pimpl *ptr);
 };
