@@ -10,7 +10,7 @@ struct prefetch_stream;
 template<typename T, size_t PREFETCH_SIZE>
 prefetch_stream<T, PREFETCH_SIZE>& operator>>(prefetch_stream<T, PREFETCH_SIZE> &in, T& dst);
 
-template<typename T, size_t PREFETCH_SIZE>
+template<typename T, size_t PREFETCH_SIZE=10>
 struct prefetch_stream
 {
     typedef prefetch_stream type;

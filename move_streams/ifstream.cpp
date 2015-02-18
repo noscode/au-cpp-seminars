@@ -70,25 +70,34 @@ bool ifstream::fail() const
 
 ifstream& operator>>(ifstream &in, int &out)
 {
-    fscanf(in.file_, "%d", &out);
+    if (in.good())
+    {
+        fscanf(in.file_, "%d", &out);
+    }
     return in;
 }
 
 ifstream& operator>>(ifstream &in, double &out)
 {
-    fscanf(in.file_, "%lf", &out);
+    if (in.good())
+    {
+        fscanf(in.file_, "%lf", &out);
+    }
     return in;
 }
 
 ifstream& operator>>(ifstream &in, std::string &out)
 {
-    int chr = fgetc(in.file_);
-    while(in.good()) {
-        out += (char)chr;
-        chr = fgetc(in.file_);
-        if (chr == '\n')
-        {
-            break;
+    if (in.good())
+    {
+        int chr = fgetc(in.file_);
+        while(in.good()) {
+            out += (char)chr;
+            chr = fgetc(in.file_);
+            if (chr == '\n')
+            {
+                break;
+            }
         }
     }
     return in;
