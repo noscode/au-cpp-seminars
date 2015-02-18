@@ -2,16 +2,15 @@
 
 ifstream::ifstream()
     : file_(nullptr)
-    , path_(nullptr)
 {}
 
-ifstream::ifstream(const char *path)
-    : file_(fopen(path, "r"))
+ifstream::ifstream(const std::string &path)
+    : file_(fopen(path.c_str(), "r"))
     , path_(path)
 {}
 
 ifstream::ifstream(const ifstream &src)
-    : file_(fopen(src.path_, "r"))
+    : file_(fopen(src.path_.c_str(), "r"))
     , path_(src.path_)
 {
     fpos_t pos;
@@ -20,11 +19,9 @@ ifstream::ifstream(const ifstream &src)
 }
 
 ifstream::ifstream(ifstream &&src)
-    : file_(src.file_)
-    , path_(src.path_)
+    : ifstream()
 {
-    src.file_ = nullptr;
-    src.path_ = nullptr;
+    swap(src);
 }
 
 ifstream& ifstream::operator=(ifstream src)
@@ -39,7 +36,6 @@ ifstream::~ifstream()
     {
         fclose(file_);
     }
-    path_ = nullptr;
 }
 
 void ifstream::swap(ifstream &other)
@@ -60,12 +56,17 @@ bool ifstream::good() const
 
 bool ifstream::eof() const
 {
-    return feof(file_);
+    if (file_)
+        return feof(file_);
+    else return true;
 }
 
 bool ifstream::fail() const
 {
-    return ferror(file_);
+    if (file_)
+        return ferror(file_);
+    else
+        return true;
 }
 
 ifstream& operator>>(ifstream &in, int &out)

@@ -17,6 +17,7 @@ void test_read(STREAM &in, const READT &expected)
 template<typename ISTREAM, typename EXPECTED_ARRAY>
 void test_stream(ISTREAM &in, EXPECTED_ARRAY expected)
 {
+    assert(expected.size() >= 10);
     size_t i = 0;
     for (; i != 3; ++i)
         test_read(in, expected[i]);

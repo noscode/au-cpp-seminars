@@ -5,7 +5,7 @@
 struct ifstream
 {
     ifstream();
-    explicit ifstream(const char *path);
+    explicit ifstream(const std::string &path);
     ifstream(const ifstream &src);
     ifstream(ifstream &&src);
     ifstream& operator=(ifstream src);
@@ -17,7 +17,7 @@ struct ifstream
     bool eof() const;
 private:
     FILE *file_;
-    const char *path_;
+    std::string path_;
 
     friend ifstream& operator>>(ifstream &in, int &out);
     friend ifstream& operator>>(ifstream &in, double &out);

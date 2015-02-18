@@ -18,9 +18,10 @@ struct prefetch_stream
     static constexpr size_t prefetch_size = PREFETCH_SIZE;
 
     explicit prefetch_stream(const char *path);
-    prefetch_stream(const prefetch_stream &src);
-    prefetch_stream(prefetch_stream &&src);
-    prefetch_stream& operator=(prefetch_stream src);
+    prefetch_stream(const prefetch_stream &src) = default;
+    prefetch_stream(prefetch_stream &&src) = default;
+    prefetch_stream& operator=(const prefetch_stream &src) = default;
+    prefetch_stream& operator=(prefetch_stream &&src) = default;
 
     void swap(prefetch_stream &src);
     bool good() const;
@@ -50,30 +51,6 @@ prefetch_stream<T, PREFETCH_SIZE>::prefetch_stream(const char *path)
 {}
 
 template<typename T, size_t PREFETCH_SIZE>
-prefetch_stream<T, PREFETCH_SIZE>::prefetch_stream(const prefetch_stream &src)
-    : prefetched_(src.prefetched_)
-    , ifstream_(src.ifstream_)
-    , read_pos_(src.read_pos_)
-    , prefetched_cnt_(src.prefetched_cnt_)
-{}
-
-template<typename T, size_t PREFETCH_SIZE>
-prefetch_stream<T, PREFETCH_SIZE>::prefetch_stream(prefetch_stream &&src)
-    : ifstream_()
-    , read_pos_(0)
-    , prefetched_cnt_(0)
-{
-    swap(src);
-}
-
-template<typename T, size_t PREFETCH_SIZE>
-auto prefetch_stream<T, PREFETCH_SIZE>::operator=(prefetch_stream src) -> type&
-{
-    swap(src);
-    return *this;
-}
-
-template<typename T, size_t PREFETCH_SIZE>
 void prefetch_stream<T, PREFETCH_SIZE>::swap(prefetch_stream &other)
 {
     std::swap(ifstream_, other.ifstream_);
@@ -98,10 +75,9 @@ prefetch_stream<T, PREFETCH_SIZE>& operator>>(prefetch_stream<T, PREFETCH_SIZE> 
 
         while (in.prefetched_cnt_ < in.prefetched_.size() && !in.ifstream_.eof())
         {
-            T read;
-            in.ifstream_ >> read;
+            in.ifstream_ >> in.prefetched_[in.prefetched_cnt_];
             if (in.ifstream_.fail()) { break; }
-            in.prefetched_[in.prefetched_cnt_++] = std::move(read);
+            in.prefetched_cnt_++;
         }
     }
 
