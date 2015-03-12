@@ -8,5 +8,5 @@ struct pimpl_example
     ~pimpl_example();
 private:
     struct pimpl;
-    shared_ptr<pimpl> pimpl_ptr_;
+    scoped_ptr<pimpl> pimpl_ptr_;
 };

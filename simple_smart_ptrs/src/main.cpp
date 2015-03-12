@@ -1,5 +1,6 @@
 #include <iostream>
 #include <utility>
+#include <cassert>
 #include "scoped_ptr.h"
 #include "unique_ptr.h"
 #include "shared_ptr.h"
@@ -50,8 +51,14 @@ int main()
     //auto foo_uptr2(foo_uptr);// - fails
 
     shared_ptr<foo> foo_shptr(new foo {888, 999});
-    auto foo_shptr2 = foo_shptr;
+    shared_ptr<foo> foo_shptr2 = foo_shptr;
     std::cerr << foo_shptr.get() << std::endl;
     std::cerr << foo_shptr2.get() << std::endl;
+
+    weak_ptr<foo> foo_wptr(foo_shptr);
+    foo_shptr.reset();
+    foo_shptr2.reset();
+    assert(foo_wptr.expired());
+    //weak_ptr<int> int_wptr(foo_shptr);
     return 0;
 }
