@@ -5,7 +5,7 @@
 
 template<class T>
 struct ostream_iterator :
-    std::iterator<std::output_iterator_tag, T,
+    std::iterator<std::output_iterator_tag, void,
         void, void, void>
 {
     typedef std::ostream ostream_type;
@@ -21,10 +21,6 @@ struct ostream_iterator :
 
     my_type& operator++();
     my_type operator++(int);
-
-    bool operator==(const my_type &other) const;
-    bool operator!=(const my_type &other) const;
-
 protected:
     std::ostream &out_stream_;
     std::string delimeter_;
@@ -36,7 +32,7 @@ ostream_iterator<T>::ostream_iterator(ostream_type& ostream)
     , delimeter_("")
 {}
 
-    template<typename T>
+template<typename T>
 ostream_iterator<T>::ostream_iterator(ostream_type& ostream,
         const std::string &delimeter)
     : out_stream_(ostream)
