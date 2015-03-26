@@ -22,8 +22,16 @@ void bool_1st_arg_func(bool b)
     (void)b;
 }
 
+static void test_shared_ptr()
+{
+    struct foo;
+    shared_ptr<foo> not_initialized;
+    (void)not_initialized;
+}
+
 int main()
 {
+    test_shared_ptr();
     scoped_ptr<foo> foo_ptr(new foo {0, 111});
     //foo_ptr = std::move(foo_ptr); // - fails
     //auto foo_ptr2(foo_ptr);// - fails

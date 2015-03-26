@@ -19,7 +19,8 @@ struct shared_ptr
 {
     typedef std::function<void(T*)> del_func;
 
-    explicit shared_ptr(T *ptr=nullptr,
+    shared_ptr();
+    explicit shared_ptr(T *ptr,
         del_func deleter=default_delete_func<T>);
     explicit shared_ptr(const weak_ptr<T> &src);
     shared_ptr(const shared_ptr<T> &src);
@@ -84,8 +85,12 @@ private:
 };
 
 template<typename T>
-shared_ptr<T>::shared_ptr(T *ptr,
-    del_func deleter)
+shared_ptr<T>::shared_ptr()
+    : shared_ptr(nullptr, [](T *ptr) {})
+{}
+
+template<typename T>
+shared_ptr<T>::shared_ptr(T *ptr, del_func deleter)
 {
     add_ref(new shared_data{0, 0, ptr, deleter});
 }
