@@ -20,8 +20,10 @@ struct enumerable
     enumerable<DST_TYPE> select(std::function<DST_TYPE(const ELEM_TYPE&)> transform) const;
     */
     template<class TRANS_FUNC>
-    auto select(TRANS_FUNC transform_func) const ->
-        enumerable<decltype(transform_func(*static_cast<ELEM_TYPE*>(nullptr)))>;
+    using transform_ret_type = enumerable<decltype((*static_cast<TRANS_FUNC*>(nullptr))(*static_cast<ELEM_TYPE*>(nullptr)))>;
+    template<class TRANS_FUNC>
+    auto select(TRANS_FUNC transform_func) const -> transform_ret_type<TRANS_FUNC>;
+
     size_t count() const;
     size_t count(std::function<bool(const ELEM_TYPE&)> pred) const;
     bool any() const;
@@ -101,7 +103,7 @@ enumerable<DST_TYPE> enumerable<SRC_TYPE>::select(
 template<class ELEM_TYPE>
 template<class TRANS_FUNC>
 auto enumerable<ELEM_TYPE>::select(TRANS_FUNC transform_func) const
-    -> enumerable<decltype(transform_func(*static_cast<ELEM_TYPE*>(nullptr)))>
+    -> transform_ret_type<TRANS_FUNC>
 {
     using DST_TYPE = decltype(transform_func(*static_cast<ELEM_TYPE*>(nullptr)));
     std::vector<DST_TYPE> result_collection;

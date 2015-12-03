@@ -17,10 +17,11 @@ int main()
     using std::cout;
     using std::endl;
 
-    enumerable<std::string> en =
+    enumerable<int> en_x =
          from({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10})
         .where([](int a) { return a > 5; })
-        .print(cout)
+        .print(cout);
+    enumerable<std::string> en = en_x
         .select([](int a) { return a * a; })
         .print(cout)
         .select(to_string<int>)
