@@ -26,7 +26,6 @@ int main()
         .print(cout)
         .select(to_string<int>)
         .print(cout);
-
     std::cout << en.count() << std::endl;
     std::cout << en.count([](const std::string &str) { return str == "100"; }) << std::endl;
     std::cout << en.any() << std::endl;
