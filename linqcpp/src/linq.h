@@ -15,8 +15,13 @@ struct enumerable
 
     enumerable& print(std::ostream &out);
     enumerable where(std::function<bool(const ELEM_TYPE&)> pred) const;
+    /*
     template<class DST_TYPE>
     enumerable<DST_TYPE> select(std::function<DST_TYPE(const ELEM_TYPE&)> transform) const;
+    */
+    template<class TRANS_FUNC>
+    auto select(TRANS_FUNC transform_func) const ->
+        enumerable<decltype(transform_func(*static_cast<ELEM_TYPE*>(nullptr)))>;
     size_t count() const;
     size_t count(std::function<bool(const ELEM_TYPE&)> pred) const;
     bool any() const;
@@ -75,11 +80,30 @@ std::vector<ELEM_TYPE> enumerable<ELEM_TYPE>::toVector() const
     return collection_;
 }
 
+/*
 template<class SRC_TYPE>
 template<class DST_TYPE>
 enumerable<DST_TYPE> enumerable<SRC_TYPE>::select(
         std::function<DST_TYPE(const SRC_TYPE&)> transform_func) const
 {
+    std::vector<DST_TYPE> result_collection;
+    result_collection.reserve(result_collection.size());
+    std::transform(
+            collection_.begin(),
+            collection_.end(),
+            std::back_inserter(result_collection),
+            transform_func
+    );
+    return enumerable<DST_TYPE>(result_collection);
+}
+*/
+
+template<class ELEM_TYPE>
+template<class TRANS_FUNC>
+auto enumerable<ELEM_TYPE>::select(TRANS_FUNC transform_func) const
+    -> enumerable<decltype(transform_func(*static_cast<ELEM_TYPE*>(nullptr)))>
+{
+    using DST_TYPE = decltype(transform_func(*static_cast<ELEM_TYPE*>(nullptr)));
     std::vector<DST_TYPE> result_collection;
     result_collection.reserve(result_collection.size());
     std::transform(

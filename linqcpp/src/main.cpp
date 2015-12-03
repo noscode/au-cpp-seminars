@@ -21,9 +21,9 @@ int main()
          from({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10})
         .where([](int a) { return a > 5; })
         .print(cout)
-        .select<int>([](int a) { return a * a; })
+        .select([](int a) { return a * a; })
         .print(cout)
-        .select<std::string>(to_string<int>)
+        .select(to_string<int>)
         .print(cout);
 
     std::cout << en.count() << std::endl;
