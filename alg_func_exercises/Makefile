@@ -1,5 +1,5 @@
 ./bin/main: ./src/main.cpp
-	g++ -Wall -Werror -std=c++11 $< -o $@
+	g++ -Wall -Werror -std=c++11 -g $< -o $@
 
 .PHONY: clean
 

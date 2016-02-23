@@ -4,6 +4,7 @@
 #include <iterator>
 #include <string>
 #include <cassert>
+#include <iostream>
 
 template<typename ITERATOR>
 using ivt = typename std::iterator_traits<ITERATOR>::value_type;
@@ -72,6 +73,25 @@ void heap_sort(ITERATOR begin, ITERATOR end)
         --pop_heap_cnt;
     }
 }
+
+template<class T>
+struct inputed_filter
+{
+    bool operator()(const T &value)
+    {
+        while(white_list_.size() < WHITE_LIST_LEN)
+        {
+            T tmp;
+            std::cin >> tmp;
+            white_list_.emplace_back(std::move(tmp));
+        }
+        auto found_val_it = std::find(white_list_.begin(), white_list_.end(), value);
+        return found_val_it == white_list_.end();
+    }
+private:
+    static const size_t WHITE_LIST_LEN = 5;
+    std::vector<T> white_list_;
+};
 
 template<typename CONT_ITERATOR>
 struct linearized_container_iterator:
@@ -191,6 +211,14 @@ int main() {
 
     heap_sort(unsorted2.begin(), unsorted2.end());
     print(unsorted2.begin(), unsorted2.end());
+
+    std::vector<std::string> vec = {
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
+    };
+    inputed_filter<std::string> filter;
+    auto filter_ref = std::ref(filter);
+    erase_if(vec, filter_ref);
+    print(vec.begin(), vec.end());
 
     typedef std::vector<std::vector<std::string>> vec_vec_string_t;
     vec_vec_string_t vec_vec_string = {
