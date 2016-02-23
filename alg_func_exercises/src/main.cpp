@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iterator>
 #include <string>
+#include <cassert>
 
 template<typename ITERATOR>
 using ivt = typename std::iterator_traits<ITERATOR>::value_type;
@@ -162,12 +163,17 @@ int main() {
         << std::endl;
 
     std::vector<int> set;
-    set_add(set, 10);
-    set_add(set, 10);
-    set_add(set, 10);
-    set_add(set, 5);
+    assert(*set_add(set, 10) == 10);
+    assert(set_add(set, 10) == set.end());
+    assert(set_add(set, 10) == set.end());
+    assert(*set_add(set, 5) == 5);
     set_add(set, 12);
     set_add(set, 6);
+    assert(set[0] == 5);
+    assert(set[1] == 6);
+    assert(set[2] == 10);
+    assert(set[3] == 12);
+    assert(set.size() == 4);
     print(set.begin(), set.end());
 
     erase_if(set, [](int val) { return val > 6; });
