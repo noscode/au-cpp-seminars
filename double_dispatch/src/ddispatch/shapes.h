@@ -9,6 +9,12 @@ struct shape
 
     virtual ~shape()
     {}
+
+protected:
+    shape(const shape &src) = default;
+    shape(shape &&src) = default;
+    shape& operator=(const shape &src) = default;
+    shape& operator=(shape &&src) = default;
 private:
     double x_;
     double y_;
@@ -37,7 +43,13 @@ struct circle : shape
 {
     circle(double center_x, double center_y, double radius)
         : shape(center_x, center_y)
+        , radius_(radius)
     {}
 private:
     double radius_;
 };
+
+// Polymorphic by 2 runtime types function and
+// its initialization
+void shape_init_intersect_dd();
+void intersect(shape &sh1, shape& sh2);

@@ -48,3 +48,7 @@ private:
     typedef std::map<type_ix_pair_type, stored_func_type> dd_map_type;
     static dd_map_type dd_map;
 };
+
+template<typename BASE_TYPE, typename TAG>
+typename double_dispatcher<BASE_TYPE, TAG>::dd_map_type
+double_dispatcher<BASE_TYPE, TAG>::dd_map;

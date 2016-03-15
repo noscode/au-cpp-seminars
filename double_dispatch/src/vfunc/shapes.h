@@ -74,3 +74,8 @@ struct circle : shape
 private:
     double radius_;
 };
+
+inline void intersect(shape &sh1, shape &sh2)
+{
+    sh1.intersect(sh2);
+}

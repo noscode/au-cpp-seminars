@@ -1,12 +1,15 @@
-all: bin/self bin/rtti
+all: bin/vfunc bin/ddispatch
 
-bin/self: src/self.cpp src/shapes_self_dispatch.h
-	g++ -Wall -Werror -std=c++11 \
-		src/self.cpp src/shapes_self_dispatch.cpp -o $@
+VFUNC_SDIR=src/vfunc/
+DD_SDIR=src/ddispatch/
 
-bin/rtti: src/shapes.h src/shapes_intersect.h src/double_dispatch.h \
-	src/rtti.cpp
-	g++ -Wall -Werror -std=c++11 src/rtti.cpp -o $@
+bin/vfunc: $(VFUNC_SDIR)main.cpp \
+	$(VFUNC_SDIR)shapes.cpp $(VFUNC_SDIR)shapes.h
+	g++ -Wall -Werror -std=c++11 $(wordlist 1,2,$^) -o $@
+
+bin/ddispatch: $(DD_SDIR)/main.cpp $(DD_SDIR)shapes.cpp \
+	$(DD_SDIR)/shapes.h $(DD_SDIR)/double_dispatcher.h
+	g++ -Wall -Werror -std=c++11 $(wordlist 1,2,$^) -o $@
 
 clean:
 	rm -rf bin/*
