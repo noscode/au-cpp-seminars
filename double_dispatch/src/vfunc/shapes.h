@@ -1,6 +1,4 @@
 #pragma once
-#include <iostream>
-#include <typeinfo>
 
 struct point;
 struct rectangle;
@@ -17,15 +15,6 @@ struct shape
     virtual void intersect_impl(point &other) = 0;
     virtual void intersect_impl(rectangle &other) = 0;
     virtual void intersect_impl(circle &other) = 0;
-
-    template<typename T, typename U>
-    static void intersect_impl_print(T &left, U &right)
-    {
-        std::cout << "Completed dispatching of "
-            << typeid(T).name() << " and " 
-            << typeid(U).name()
-            << std::endl;
-    }
 
 private:
     double x_;

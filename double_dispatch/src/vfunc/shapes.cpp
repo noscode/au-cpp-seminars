@@ -1,3 +1,6 @@
+#include <iostream>
+#include <typeinfo>
+
 #include "shapes.h"
 
 namespace impl
