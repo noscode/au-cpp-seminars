@@ -27,8 +27,7 @@ void vector_iterator_invalidation()
     vec.push_back(3);
     vec.push_back(4);
     vec.push_back(5);
-    // TODO what if auto it?
-    for(std::vector<int>::iterator it = vec.begin(); it != vec.end(); ++it) {
+    for(auto it = vec.begin(); it != vec.end(); ++it) {
         std::cout << *it << std::endl;
         if (*it == 2) {
             vec.push_back(99);
@@ -45,7 +44,7 @@ void array_stack_bounds_violation()
 static void memcpy_overlap()
 {
     int vec[10];
-    memcpy(&vec[0], &vec[2], sizeof(vec[0] * 3));
+    memcpy(&vec[0], &vec[2], sizeof(vec[0]) * 3);
 }
 
 void invalid_pointer_aliasing()

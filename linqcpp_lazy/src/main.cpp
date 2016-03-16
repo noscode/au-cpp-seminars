@@ -1,4 +1,3 @@
-#define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
@@ -11,17 +10,17 @@ int main()
 
 	auto even_seq = from(a)
 		.where([](int x) { return x % 2 == 0; });
-		
+
 	for (auto i : even_seq.to_vector())
 		cout << i << " ";
 	cout << endl;
-	
+
 	auto squares = even_seq.select<int>([](int x){ return x * x; });
 
 	for (auto i : squares.to_vector())
 		cout << i << " ";
 	cout << endl;
-	
+
 	cout << squares.any([](int x){ return x > 130; }) << endl;
 
 	cout << squares.count([](int x){ return x > 15; }) << endl;

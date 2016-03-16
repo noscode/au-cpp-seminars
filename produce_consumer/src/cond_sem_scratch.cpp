@@ -18,8 +18,10 @@ struct evented_buffer_t
     virtual ~evented_buffer_t();
     size_t size() const;
     write_info_t wait_write();
-    void write(size_t offset, size_t size, const char *src);
-    void read(size_t offset, size_t size, char *dst);
+    void write(size_t offset,size_t size,
+            const char *src);
+    void read(size_t offset, size_t size,
+            char *dst);
 };
 
 volatile bool finish = false;

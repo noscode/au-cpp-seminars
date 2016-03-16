@@ -4,4 +4,7 @@ all:
 	g++ -Wall -Werror -std=c++11 -g ./src/profsys.cpp -o ./bin/profsys
 	g++ -Wall -Werror -std=c++11 -g ./src/profus.cpp -o ./bin/profus
 
-.PHONY: all
+clean:
+	rm -rf bin/*
+
+.PHONY: all clean

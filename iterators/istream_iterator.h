@@ -85,8 +85,7 @@ template<typename T>
 bool istream_iterator<T>::operator==(const my_type &other) const
 {
     return (in_stream_ == nullptr
-        && other.in_stream_ == nullptr) ||
-        (in_stream_->eof() && other.in_stream_->eof());
+        && other.in_stream_ == nullptr);
 }
 
 template<typename T>

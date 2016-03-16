@@ -7,10 +7,9 @@ namespace bits_align
 
 template<size_t bits_num>
 struct align_uint
-{
-    typedef typename align_uint<bits_num + 1>::type type;
-
+{   
     static_assert(bits_num <= 64, "bits_num is in uint size bounds");
+    typedef typename align_uint<bits_num + 1>::type type;
 };
 
 template<> struct align_uint<8>  { typedef uint8_t  type; };

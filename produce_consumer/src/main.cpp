@@ -27,7 +27,6 @@ protected:
     char *data_;
     size_t size_;
 
-    std::condition_variable write_wait_cond_;
     std::mutex write_wait_mutex_;
     volatile bool write_occured_;
     volatile size_t waiters_count_;

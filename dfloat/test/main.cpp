@@ -24,6 +24,8 @@ int main()
 
     ddouble d(1.25e10, 1e-10);
     write_ddouble(d);
+    d = d;
+    ddouble c(d);
     std::cout << "original: " << d << std::endl;
     std::cout << "restored: " << read_ddouble() << std::endl;
     return 0;
