@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <new>
+#include <iostream>
 
 struct fault_distribution
 {
@@ -12,8 +13,9 @@ struct fault_distribution
 
     bool should_fault()
     {
-        // 50% chance to fail
-        return rand() > (RAND_MAX / 2);
+        // chance to fail
+        return rand() < (RAND_MAX / 60);
+        return false;
     }
 };
 
@@ -21,10 +23,13 @@ void* operator new(std::size_t count)
 {
     static fault_distribution fdistr;
 
-    void *ptr = malloc(count);
-    if ((!ptr) || fdistr.should_fault())
+    if (fdistr.should_fault())
+    {
+        std::cerr << "injecting allocation fault" << std::endl;
         throw std::bad_alloc();
-    return ptr;
+    }
+
+    return malloc(count);
 }
 
 void operator delete(void* ptr)

@@ -17,6 +17,10 @@ struct node
     node(const KEY &key, const VALUE &val)
         : key_(key)
         , val_(val)
+        , parent_(nullptr)
+    {}
+
+    ~node() noexcept
     {}
 
     node(node &&src) = default;
@@ -27,22 +31,27 @@ struct node
 
     void putLeft(std::unique_ptr<node> &&nptr) noexcept
     {
-        left_ptr_ = nptr;
+        left_ptr_ = std::move(nptr);
     }
 
     std::unique_ptr<node> takeLeft() noexcept
     {
-        return left_ptr_;
+        return std::move(left_ptr_);
     }
 
     void putRight(std::unique_ptr<node> &&nptr) noexcept
     {
-        right_ptr_ = nptr;
+        right_ptr_ = std::move(nptr);
     }
 
     std::unique_ptr<node> takeRight() noexcept
     {
-        return right_ptr_;
+        return std::move(right_ptr_);
+    }
+
+    node*& parent() noexcept
+    {
+        return parent_;
     }
 
     node* left() noexcept
@@ -67,6 +76,7 @@ struct node
 private:
     KEY key_;
     VALUE val_;
+    node *parent_;
     std::unique_ptr<node> left_ptr_;
     std::unique_ptr<node> right_ptr_;
 };
@@ -112,7 +122,7 @@ struct bst_key_absent_exception: std::logic_error
     {}
 };
 
-// KEY should have operator <, <<
+// KEY should have operator <, <<, () constructor
 template<class KEY, class VALUE>
 struct bin_search_tree
 {
@@ -133,7 +143,8 @@ private:
     node* find_nearest_node(const KEY &key);
     // throws bst_key_exists_exception
     void insert_node(std::unique_ptr<node> &&node_ptr);
-    void erase_node(std::unique_ptr<node> &&node_ptr) noexcept;
+    void reinsert_node(std::unique_ptr<node> &&node_ptr) noexcept;
+    void erase_node(node *node) noexcept;
     static bool should_go_right(node *parent, const KEY &key);
 
     std::unique_ptr<node> root_ptr_;
@@ -152,8 +163,8 @@ auto bin_search_tree<KEY, VALUE>::find_nearest_node(const KEY &key) -> node*
             break;
 
         node *next_child = should_go_right(cur_node, key)
-            ? cur_node.right()
-            : cur_node.left();
+            ? cur_node->right()
+            : cur_node->left();
 
         if (!next_child)
             break;
@@ -181,17 +192,31 @@ void bin_search_tree<KEY, VALUE>::insert_node(std::unique_ptr<node> &&new_node_p
     node *nearest_node = find_nearest_node(new_node_ptr->key());
     if (!nearest_node)
     {
-        root_ptr_ = new_node_ptr;
+        root_ptr_ = std::move(new_node_ptr);
         return;
     }
 
     if (nearest_node->key() == new_node_ptr->key())
         throw bst_verbose_key_exists_exception<KEY>(new_node_ptr->key());
 
+    new_node_ptr->parent() = nearest_node;
     if (should_go_right(nearest_node, new_node_ptr->key()))
-        nearest_node.putRight(std::move(new_node_ptr));
+        nearest_node->putRight(std::move(new_node_ptr));
     else
-        nearest_node.putLeft(std::move(new_node_ptr));
+        nearest_node->putLeft(std::move(new_node_ptr));
+}
+
+template<class KEY, class VALUE>
+void bin_search_tree<KEY, VALUE>::reinsert_node(std::unique_ptr<node> &&new_node_ptr) noexcept
+{
+    try
+    {
+        insert_node(std::move(new_node_ptr));
+    }
+    catch(const bst_key_exists_exception &ex)
+    {
+        assert(false);
+    }
 }
 
 template<class KEY, class VALUE>
@@ -206,23 +231,27 @@ void bin_search_tree<KEY, VALUE>::insert(KIT kbegin, KIT kend, VIT vbegin)
     auto vit = vbegin;
     for(size_t node_ix = 0; node_ix < nodes_cnt; ++node_ix, ++kit, ++vbegin)
     {
-        node_ptrs[node_ix] = new node(*kit, *vit);
+        node_ptrs.emplace_back(new node(*kit, *vit));
+        if (node_ix == (nodes_cnt / 2))
+        {
+            //std::cerr << "injecting fault 1" << std::endl;
+            //throw std::bad_alloc();
+        }
     }
     // at this point all the nodes are allocated
     // and will be deleted if exception is thrown in code below
-    kit = kbegin;
-    vit = vbegin;
-    for(size_t node_ix = 0; node_ix < nodes_cnt; ++node_ix, ++kit, ++vbegin)
+    for(auto nptr_it = node_ptrs.begin(); nptr_it != node_ptrs.end(); ++nptr_it)
     {
         try
         {
-            insert_node(std::move(node_ptrs[node_ix]));
+            insert_node(std::move(*nptr_it));
         }
         catch(const bst_key_exists_exception &ex)
         {
-            for(size_t node_del_ix = 0; node_del_ix < node_ix; ++node_del_ix)
+            kit = kbegin;
+            for(auto nptr_del_it = node_ptrs.begin(); nptr_del_it != nptr_it; ++nptr_del_it, ++kit)
             {
-                erase_node(std::move(node_ptrs[node_del_ix]));
+                erase_node(find_nearest_node(*kit));
             }
             throw;
         }
@@ -230,11 +259,29 @@ void bin_search_tree<KEY, VALUE>::insert(KIT kbegin, KIT kend, VIT vbegin)
 }
 
 template<class KEY, class VALUE>
-void bin_search_tree<KEY, VALUE>::erase_node(std::unique_ptr<node> &&node_ptr) noexcept
+void bin_search_tree<KEY, VALUE>::erase_node(node *enode) noexcept
 {
-    // TODO remove node from parent and child nodes
-    // preserve bin search tree properties after deletion
-    (void)node_ptr;
+    node *parent = enode->parent();
+    std::unique_ptr<node> left_ptr = enode->takeLeft();
+    std::unique_ptr<node> right_ptr = enode->takeRight();
+
+    if (parent)
+    {
+        if (should_go_right(parent, enode->key()))
+        {
+            parent->putRight(nullptr);
+        }
+        else
+        {
+            parent->putLeft(nullptr);
+        }
+    }
+    else
+    {
+        root_ptr_ = nullptr;
+    }
+    reinsert_node(std::move(left_ptr));
+    reinsert_node(std::move(right_ptr));
 }
 
 template<class KEY, class VALUE>

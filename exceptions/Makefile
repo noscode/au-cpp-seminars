@@ -1,6 +1,6 @@
 bin/test: src/main.cpp src/faults.cpp \
 	src/bin_search_tree.h
-	g++ -Wall -Werror -std=c++11 $(wordlist 1,2,$^) -o $@
+	g++ -Wall -Werror -ggdb -std=c++11 $(wordlist 1,2,$^) -o $@
 
 .PHONY: clean
 
