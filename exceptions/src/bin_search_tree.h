@@ -232,11 +232,6 @@ void bin_search_tree<KEY, VALUE>::insert(KIT kbegin, KIT kend, VIT vbegin)
     for(size_t node_ix = 0; node_ix < nodes_cnt; ++node_ix, ++kit, ++vbegin)
     {
         node_ptrs.emplace_back(new node(*kit, *vit));
-        if (node_ix == (nodes_cnt / 2))
-        {
-            //std::cerr << "injecting fault 1" << std::endl;
-            //throw std::bad_alloc();
-        }
     }
     // at this point all the nodes are allocated
     // and will be deleted if exception is thrown in code below

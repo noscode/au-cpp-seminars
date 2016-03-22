@@ -2,20 +2,20 @@
 #include <cstdlib>
 #include <new>
 #include <iostream>
+#include <ctime>
 
 struct fault_distribution
 {
     fault_distribution()
     {
-        // Make faults reproduction stable
-        srand(0);
+        srand(time(NULL));
+        //srand(0); // makes faults reproduction stable
     }
 
     bool should_fault()
     {
-        // chance to fail
-        return rand() < (RAND_MAX / 60);
-        return false;
+        return rand() < (RAND_MAX / 60); // 1/60 chance to fail
+        //return false; // always fail
     }
 };
 

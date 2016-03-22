@@ -88,20 +88,22 @@ void test_tree1()
     }
     catch(const bst_key_absent_exception &ex) {}
 
-    std::vector<KEY> keys({
-        "777",
-        "asdf",
-        "2259",
-        "vvvbs",
-        "tgbasasdasdasdasdasdasd"
-    });
-    std::vector<VALUE> values({
-        { 1, 2, 3, 4, 5 },
-        { 1, 2, 3, 4, 5 },
-        { 1, 2, 3, 4, 5 },
-        { 1, 2, 3, 4, 5 },
-        { 1, 2, 3, 4, 5 }
-    });
+    std::vector<KEY> keys;
+    keys.reserve(5);
+    keys.emplace_back("777");
+    keys.emplace_back("asdf");
+    keys.emplace_back("2259");
+    keys.emplace_back("vvbs");
+    keys.emplace_back("tgbasasdasdasdasdasdasd");
+ 
+    std::vector<VALUE> values;
+    values.reserve(5);
+    values.push_back({ 1, 2, 3, 4, 5 });
+    values.push_back({ 1, 2, 3, 4, 5 });
+    values.push_back({ 1, 2, 3, 4, 5 });
+    values.push_back({ 1, 2, 3, 4, 5 });
+    values.push_back({ 1, 2, 3, 4, 5 });
+
     tree.insert(keys.begin(), keys.end(), values.begin());
 }
 
