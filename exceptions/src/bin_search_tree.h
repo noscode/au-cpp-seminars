@@ -242,7 +242,7 @@ void bin_search_tree<KEY, VALUE>::insert(KIT kbegin, KIT kend, VIT vbegin)
         {
             insert_node(std::move(*nptr_it));
         }
-        catch(const bst_key_exists_exception &ex)
+        catch(...)
         {
             kit = kbegin;
             for(auto nptr_del_it = node_ptrs.begin(); nptr_del_it != nptr_it; ++nptr_del_it, ++kit)
