@@ -4,15 +4,18 @@
 #include <cstring>
 #include <iterator>
 #include <algorithm>
+#include <iostream>
 
 template<class STR1, class STR2>
 void test_strings_equal(STR1& str1, STR2 &str2)
 {
-    assert(strcmp(str1.c_str(), str2.c_str()) == 0);
     assert(str1.size() == str2.size());
     assert(std::equal(str1.begin(), str1.end(), str2.begin()));
     assert(std::distance(str1.begin(), str1.end()) ==
             std::distance(str2.begin(), str2.end()));
+    // call operator << before we force strings to be not lazy
+    std::cout << str1 << std::endl << str2 << std::endl;
+    assert(strcmp(str1.c_str(), str2.c_str()) == 0);
 }
 
 int main()
@@ -40,5 +43,6 @@ int main()
         str1 + str1 + str_concat1;
     test_strings_equal(str_concat2, imstr_concat2);
     test_strings_equal(imstr_concat2, str_concat2);
+
     return 0;
 }
