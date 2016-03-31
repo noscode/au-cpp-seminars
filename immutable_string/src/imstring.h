@@ -139,7 +139,7 @@ private:
         friend struct imstring_iterator;
     };
 
-    struct imstring_iterator: std::iterator<std::bidirectional_iterator_tag, char>
+    struct imstring_iterator: std::iterator<std::forward_iterator_tag, char>
     {
         imstring_iterator() = default;
         imstring_iterator(imstring_buf *root_imstring_buf)
@@ -153,7 +153,7 @@ private:
         imstring_iterator& operator=(const imstring_iterator &src) = default;
         imstring_iterator& operator=(imstring_iterator &&src) = default;
 
-        char operator*() const
+        const char& operator*() const
         {
             return *this->operator->();
         }

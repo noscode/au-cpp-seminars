@@ -31,8 +31,10 @@ int main()
     imstring imstr1_cp(imstr1);
     test_strings_equal(str1, imstr1);
     test_strings_equal(imstr1, imstr1_cp);
-    assert(imstr1.begin() == imstr1_cp.begin());
-    assert(imstr1.end() == imstr1_cp.end());
+    assert(imstr1.begin() == imstr1.begin());
+    assert(imstr1.end() == imstr1.end());
+    // check laziness
+    assert(&(*imstr1.begin()) == &(*imstr1_cp.begin()));
 
     // Test lazy concatenation
     imstring imstr_concat1 = imstr1 + imstr1_cp;
