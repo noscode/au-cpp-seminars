@@ -8,22 +8,19 @@
 #include <assert.h>
 #include <cstdint>
 
-using namespace std;
-
-
 namespace serialization
 {
-    typedef char            byte_t;
-    typedef vector<byte_t>    bytes_t;
+    using namespace std;
+    typedef char byte_t;
+    typedef vector<byte_t> bytes_t;
 
-    typedef uint64_t        size_type;
+    typedef uint64_t size_type;
 
     struct output_stream
     {
         explicit output_stream(bytes_t&& from = bytes_t())
             : buffer_(move(from))
-        {
-        }
+        {}
 
         void write(const void* data, size_t size)
         {
@@ -54,8 +51,7 @@ namespace serialization
             : begin_(from.data())
             , end_  (from.data() + from.size())
             , cur_  (from.data())
-        {
-        }
+        {}
 
         void read(void* to, size_t size)
         {
@@ -68,10 +64,8 @@ namespace serialization
         byte_t const* begin_;
         byte_t const* end_;
         byte_t const* cur_;
-
     };
 
-    
     namespace type_traits
     {
         template <class T>
@@ -95,11 +89,7 @@ namespace serialization
             enum { value = is_container<T>::value || is_pod<T>::value };
             typedef integral_constant<bool, value> type;
         };
-
-
-
     } // type_traits
-
 
     // common
     template<class type>
@@ -129,8 +119,6 @@ namespace serialization
     {
         read(is, obj);
     }
-
-
 
     //////////////////////////////////////////////////////////////////////////
     // readers
@@ -227,13 +215,11 @@ namespace serialization
         write(os, size_type(str.size()));
         os.write(str.c_str(), str.size());
     }
-} // serialization 
+} // namespace serialization
 
 
 //////////////////////////////////////////////////////////////////////////
 // tests
-
-
 template<class type>
 bool eq_container(type const& lhs, type const& rhs)
 {
@@ -247,44 +233,42 @@ bool eq_container(type const& lhs, type const& rhs)
     return true;
 }
 
-
 struct custom_record
 {
     custom_record()
         : number(0)
-    {
-    }
+    {}
 
-    custom_record(string const& t, int n)
+    custom_record(std::string const& t, int n)
         : text  (t)
         , number(n)
         , texts (n, t)
+    {}
+
+    template<class stream>
+    friend void serialize(stream& s, custom_record& r)
     {
+        serialize(s, r.text);
+        serialize(s, r.number);
+        serialize(s, r.texts);
     }
-    
-    string text;
-    int    number;
-    vector<string> texts;
+
+    friend bool operator==(custom_record const& lhs,
+            custom_record const& rhs)
+    {
+        return lhs.text == rhs.text
+            && lhs.number    == rhs.number
+            && eq_container(lhs.texts, rhs.texts);
+    }
+private:
+    std::string text;
+    int number;
+    std::vector<std::string> texts;
 };
-
-bool operator==(custom_record const& lhs, custom_record const& rhs)
-{
-    return 
-        lhs.text    == rhs.text            && 
-        lhs.number    == rhs.number        && 
-        eq_container(lhs.texts, rhs.texts);
-}
-
-template<class stream>
-void serialize(stream& s, custom_record& r)
-{
-    serialize(s, r.text  );
-    serialize(s, r.number);
-    serialize(s, r.texts );
-}
 
 int main()
 {
+    using namespace std;
     // custom struct 
     {
         serialization::output_stream os;
@@ -298,13 +282,12 @@ int main()
         write(os, v); 
 
         list<custom_record> v2;
-        
+
         serialization::input_stream is (os.data());
         read(is, v2);
 
         assert(eq_container(v, v2));
     }
-
 
     // map<string, int>
     {
