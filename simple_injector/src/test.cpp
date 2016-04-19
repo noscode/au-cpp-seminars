@@ -197,6 +197,18 @@ namespace circular_di
     }
 };
 
+namespace broken_factory_di
+{
+    static constexpr const char *ID = "broken_di";
+
+    static const di::dep_decls_t DEPS = {};
+ 
+    static std::string* create(di::dep_insts_t &deps)
+    {
+        return new std::string(deps.get<std::string>(CONFIG1_STR_ID));
+    }
+};
+
 int main()
 {
     // Part 1: only valid usage of injector
@@ -265,6 +277,15 @@ int main()
     try {
         // Unknown id
         injector.get<service3_t>("I don't exist");
+        assert(false);
+    } catch(...) {}
+
+    try {
+        // Access to not explicitly requested dependency
+        injector.factory<std::string>(
+            broken_factory_di::ID, broken_factory_di::create, broken_factory_di::DEPS
+        );
+        injector.get<std::string>(broken_factory_di::ID);
         assert(false);
     } catch(...) {}
 
