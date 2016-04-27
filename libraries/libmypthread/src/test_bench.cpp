@@ -40,13 +40,13 @@ int main(int argc, const char **argv)
     pthread_t *threads =
         (pthread_t*)malloc(sizeof(pthread_t) * workers_num);
 
-    for (workers_ix = 0; workers_ix < workers_num; ++workers_ix)
+    for(workers_ix = 0; workers_ix < workers_num; ++workers_ix)
     {
         pthread_create(&threads[workers_ix], &thread_attrs,
                 &worker_func, NULL);
     }
 
-    for (workers_ix = 0; workers_ix < workers_num; ++workers_ix)
+    for(workers_ix = 0; workers_ix < workers_num; ++workers_ix)
     {
         pthread_join(threads[workers_ix], NULL);
     }
