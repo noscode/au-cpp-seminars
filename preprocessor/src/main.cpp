@@ -124,10 +124,11 @@ int main()
     LOG(INFO, "%s %s", instruction_name(INST_IPRINT),
             instruction_description(INST_IPRINT));
 
+    // Part 4
     auto inst_stream = gen_rnd_instrs(20);
     log_instrs(inst_stream);
 
-    // Part 4
+    // Part 5
     LOG(INFO, "==============================");
     std::vector<unsigned char> super_code = {
         INST_ILOAD, 0xff, 0, 0, 0, 0, 0, 0, 0,
