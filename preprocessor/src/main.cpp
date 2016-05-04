@@ -134,8 +134,9 @@ int main()
         INST_ILOAD, 0, 0, 0xdd, 0, 0, 0, 0, 0,
         INST_IADD,
         INST_ILOAD, 0xff, 0, 0, 0, 0, 0, 0, 0,
+        INST_IADD,
         INST_IPRINT
-    };
+    }; // 0xff + 0x0000dd + 0xff = 0x2db
     log_instrs(super_code);
     exec_instrs(super_code);
 
