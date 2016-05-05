@@ -7,11 +7,13 @@
 
 #if (CONFIG_DEBUG != 0)
 #include <cstdio>
+#include <cstdlib>
 
 #define myassert(cond) do { \
     if (!(cond)) { \
         fprintf(stderr, "%s:%s:%d assertion '%s' failed\n", \
                 __FILE__, __func__, __LINE__, #cond); \
+        abort(); \
     } \
 } while(0)
 
