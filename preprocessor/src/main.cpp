@@ -19,7 +19,7 @@ struct Instruction
 };
 
 static const Instruction INSTRUCTIONS[] = {
-#define INST_DEF(b, d, l) {INST_##b, #b, d, l},
+#define INST_DEF(c, d, l) {INST_##c, #c, d, l},
     FOR_INSTRUCTIONS(INST_DEF)
 };
 #undef INST_DEF
@@ -75,16 +75,16 @@ void log_instrs(const std::vector<unsigned char> &instrs)
             break;
             case 3:
                 LOG(INFO, "%s(%d) 0x%02x%02x", curInstr.name, curInstr.code,
-                        pos[2] & 255, pos[1] & 255);
+                        pos[2], pos[1]);
             break;
             case 5:
                 LOG(INFO, "%s(%d) 0x%02x%02x%02x%02x", curInstr.name, curInstr.code,
-                        pos[4] & 255, pos[3] & 255, pos[2] & 255, pos[1] & 255);
+                        pos[4], pos[3], pos[2], pos[1]);
             break;
             case 9:
                 LOG(INFO, "%s(%d) 0x%02x%02x%02x%02x%02x%02x%02x%02x", curInstr.name, curInstr.code,
-                        pos[8] & 255, pos[7] & 255, pos[6] & 255, pos[5] & 255,
-                        pos[4] & 255, pos[3] & 255, pos[2] & 255, pos[1] & 255);
+                        pos[8], pos[7], pos[6], pos[5],
+                        pos[4], pos[3], pos[2], pos[1]);
             break;
             default:
                 assert(false);
