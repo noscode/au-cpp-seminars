@@ -137,7 +137,7 @@ int main()
         INST_ILOAD, 0xff, 0, 0, 0, 0, 0, 0, 0,
         INST_IADD,
         INST_IPRINT
-    }; // 0xff + 0x0000dd + 0xff = 0x2db
+    }; // 0xff + 0xdd0000 + 0xff = 0xdd01fe
     log_instrs(super_code);
     exec_instrs(super_code);
 
