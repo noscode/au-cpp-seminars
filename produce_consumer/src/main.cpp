@@ -19,6 +19,15 @@ struct evented_counter_t
         return value_.load();
     }
 
+    /*
+     * Before destroing this evented_counter_t
+     * you should be sure that no threads are waiting
+     * inside this evented_counter_t.
+     * This function wakes all threads.
+     * Call it and then join all the waiters.
+     * Then you can call destructor of this object.
+     * Yep. This interface is bad.
+     */
     void exit() noexcept
     {
         exit_.store(true);
@@ -182,8 +191,6 @@ static void writer_func_evented_counter(evented_counter_t *evcnt)
 
         ++steps_count;
     }
-    finish.store(true);
-    evcnt->exit();
 }
 
 static void run_evented_counter()
@@ -205,9 +212,12 @@ static void run_evented_counter()
     std::cout << "[MAIN] Threads are created. Waiting..." << std::endl;
     log_lock.unlock();
 
+    writer_thread.join();
+    finish.store(true);
+    evcnt.exit();
+
     for (size_t i = 0; i < NUM_READERS; ++i)
         reader_threads[i].join();
-    writer_thread.join();
 }
 
 static void reader_func_evented_buffer(size_t id, evented_buffer_t *evbuf)
@@ -249,9 +259,6 @@ static void writer_func_evented_buffer(evented_buffer_t *evbuf)
         evbuf->write(write_pos, write_size, write_data);
         write_pos += write_size;
     }
-    finish.store(true);
-    // last wakeup
-    evbuf->write(write_pos, 0, write_data);
 }
 
 static void run_evented_buffer()
@@ -273,9 +280,13 @@ static void run_evented_buffer()
     std::cout << "[MAIN] Threads are created. Waiting..." << std::endl;
     log_lock.unlock();
 
+    writer_thread.join();
+    finish.store(true);
+    // last readers wakeup
+    evbuf.write(0, 0, nullptr);
+
     for (size_t i = 0; i < NUM_READERS; ++i)
         reader_threads[i].join();
-    writer_thread.join();
 }
 
 int main()
