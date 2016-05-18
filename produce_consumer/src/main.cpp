@@ -3,8 +3,55 @@
 #include <mutex>
 #include <string>
 #include <condition_variable>
+#include <atomic>
 #include <cstring>
 #include <cassert>
+
+struct evented_counter_t
+{
+    explicit evented_counter_t(size_t value)
+        : value_(value)
+        , exit_(false)
+    {}
+
+    size_t get() const noexcept
+    {
+        return value_.load();
+    }
+
+    void exit() noexcept
+    {
+        exit_.store(true);
+        value_wait_cond_.notify_all();
+    }
+
+    size_t inc() noexcept
+    {
+        size_t old_value = value_.fetch_add(1);
+        value_wait_cond_.notify_all();
+        return old_value + 1;
+    }
+
+    size_t dec() noexcept
+    {
+        size_t old_value = value_.fetch_sub(1);
+        value_wait_cond_.notify_all();
+        return old_value - 1;
+    }
+
+    void wait_value(size_t target_value)
+    {
+        std::unique_lock<std::mutex> lock(value_wait_mutex_);
+        value_wait_cond_.wait(lock,
+            [&] { return (value_.load() == target_value) || exit_.load(); });
+    }
+
+private:
+    std::atomic<size_t> value_;
+    std::atomic<bool> exit_;
+    std::mutex value_wait_mutex_;
+    std::condition_variable value_wait_cond_;
+};
 
 struct write_info_t
 {
@@ -18,24 +65,27 @@ struct evented_buffer_t
     evented_buffer_t(const evented_buffer_t &src) = delete;
     evented_buffer_t(evented_buffer_t &&src) = delete;
     virtual ~evented_buffer_t();
+
     size_t size() const;
     write_info_t wait_write();
     void write(size_t offset, size_t size, const char *src);
     void read(size_t offset, size_t size, char *dst);
 protected:
-    std::mutex mutex_;
+    const size_t size_;
+
+    std::mutex data_mutex_;
     char *data_;
-    size_t size_;
 
     std::mutex write_wait_mutex_;
-    volatile bool write_occured_;
-    volatile size_t waiters_count_;
+    std::condition_variable write_wait_cond_;
+    bool write_occured_;
+    evented_counter_t waiters_count_;
     write_info_t last_write_info_;
 };
 
 evented_buffer_t::evented_buffer_t(size_t size)
-    : data_(new char[size])
-    , size_(size)
+    : size_(size)
+    , data_(new char[size])
     , write_occured_(false)
     , waiters_count_(0)
 {}
@@ -53,21 +103,17 @@ size_t evented_buffer_t::size() const
 write_info_t evented_buffer_t::wait_write()
 {
     std::unique_lock<std::mutex> lock(write_wait_mutex_);
-    waiters_count_++;
-    write_wait_cond_.wait(lock,
-            [this] { return write_occured_; });
-    waiters_count_--;
+    waiters_count_.inc();
+    write_wait_cond_.wait(lock, [this] { return write_occured_; });
+    waiters_count_.dec();
     return last_write_info_;
 }
 
 void evented_buffer_t::write(size_t offset,
         size_t size, const char *src)
 {
-    std::unique_lock<std::mutex> lock_data(mutex_, std::defer_lock);
-    std::unique_lock<std::mutex> lock_write_wait(
-            write_wait_mutex_, std::defer_lock);
-    lock_data.lock();
-    lock_write_wait.lock();
+    std::unique_lock<std::mutex> lock_data(data_mutex_);
+    std::unique_lock<std::mutex> lock_write_wait(write_wait_mutex_);
 
     last_write_info_.offset = offset;
     last_write_info_.size = size;
@@ -77,8 +123,7 @@ void evented_buffer_t::write(size_t offset,
     lock_write_wait.unlock();
     write_wait_cond_.notify_all();
 
-    while(waiters_count_)
-        std::this_thread::yield();
+    waiters_count_.wait_value(0);
     lock_write_wait.lock();
     write_occured_ = false;
 }
@@ -86,20 +131,91 @@ void evented_buffer_t::write(size_t offset,
 void evented_buffer_t::read(size_t offset,
         size_t size, char *dst)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(data_mutex_);
     std::memcpy(dst, data_ + offset, size);
 }
 
-volatile bool finish = false;
+std::atomic<bool> finish;
 const char write_data[] = "0xDEADWRITE";
 static std::mutex log_mutex;
+#define NUM_READERS 3
 
-static void reader_func(size_t id, evented_buffer_t *evbuf)
+static void reader_func_evented_counter(size_t id, evented_counter_t *evcnt)
+{
+    std::unique_lock<std::mutex> log_lock(
+        log_mutex, std::defer_lock);
+    size_t target_value = 10;
+    while(!finish.load()) {
+        evcnt->wait_value(target_value);
+        target_value = target_value == 0 ? 10 : 0;
+
+        log_lock.lock();
+        std::cout << "[READER " << id << "]"
+            << " Observed counter value " << evcnt->get()
+            << std::endl;
+        log_lock.unlock();
+    }
+}
+
+static void writer_func_evented_counter(evented_counter_t *evcnt)
+{
+    std::unique_lock<std::mutex> log_lock(log_mutex, std::defer_lock);
+    size_t steps_count = 0;
+    bool up = true;
+    while(steps_count < 100) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        if (up)
+            evcnt->inc();
+        else
+            evcnt->dec();
+
+        if (evcnt->get() == 10)
+            up = false;
+        else if (evcnt->get() == 0)
+            up = true;
+
+        log_lock.lock();
+        std::cout << "[WRITER]"
+            << " changed to " << evcnt->get()
+            << std::endl;
+        log_lock.unlock();
+
+        ++steps_count;
+    }
+    finish.store(true);
+    evcnt->exit();
+}
+
+static void run_evented_counter()
+{
+    std::unique_lock<std::mutex> log_lock(log_mutex, std::defer_lock);
+    finish.store(false);
+
+    evented_counter_t evcnt(0);
+    std::thread reader_threads[NUM_READERS];
+    for (size_t reader_id = 0; reader_id < NUM_READERS; ++reader_id)
+    {
+        reader_threads[reader_id] = std::move(
+                std::thread(reader_func_evented_counter, reader_id, &evcnt)
+        );
+    }
+    std::thread writer_thread(writer_func_evented_counter, &evcnt);
+
+    log_lock.lock();
+    std::cout << "[MAIN] Threads are created. Waiting..." << std::endl;
+    log_lock.unlock();
+
+    for (size_t i = 0; i < NUM_READERS; ++i)
+        reader_threads[i].join();
+    writer_thread.join();
+}
+
+static void reader_func_evented_buffer(size_t id, evented_buffer_t *evbuf)
 {
     std::unique_lock<std::mutex> log_lock(
         log_mutex, std::defer_lock);
     char *data = new char[evbuf->size()];
-    while(!finish) {
+    while(!finish.load()) {
         write_info_t wif = evbuf->wait_write();
         evbuf->read(wif.offset, wif.size, data);
         assert(!std::strcmp(data, write_data));
@@ -115,7 +231,7 @@ static void reader_func(size_t id, evented_buffer_t *evbuf)
     delete[] data;
 }
 
-static void writer_func(evented_buffer_t *evbuf)
+static void writer_func_evented_buffer(evented_buffer_t *evbuf)
 {
     std::unique_lock<std::mutex> log_lock(
         log_mutex, std::defer_lock);
@@ -133,25 +249,25 @@ static void writer_func(evented_buffer_t *evbuf)
         evbuf->write(write_pos, write_size, write_data);
         write_pos += write_size;
     }
-    finish = true;
+    finish.store(true);
     // last wakeup
     evbuf->write(write_pos, 0, write_data);
 }
 
-#define NUM_READERS 3
-int main()
+static void run_evented_buffer()
 {
-    std::unique_lock<std::mutex> log_lock(
-        log_mutex, std::defer_lock);
+    std::unique_lock<std::mutex> log_lock(log_mutex, std::defer_lock);
+    finish.store(false);
+
     evented_buffer_t evbuf(256);
     std::thread reader_threads[NUM_READERS];
     for (size_t reader_id = 0; reader_id < NUM_READERS; ++reader_id)
     {
         reader_threads[reader_id] = std::move(
-                std::thread(reader_func, reader_id, &evbuf)
+                std::thread(reader_func_evented_buffer, reader_id, &evbuf)
         );
     }
-    std::thread writer_thread(writer_func, &evbuf);
+    std::thread writer_thread(writer_func_evented_buffer, &evbuf);
 
     log_lock.lock();
     std::cout << "[MAIN] Threads are created. Waiting..." << std::endl;
@@ -160,6 +276,11 @@ int main()
     for (size_t i = 0; i < NUM_READERS; ++i)
         reader_threads[i].join();
     writer_thread.join();
+}
 
+int main()
+{
+    run_evented_counter();
+    run_evented_buffer();
     return 0;
 }
