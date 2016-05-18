@@ -13,6 +13,9 @@ struct evented_counter_t
         : value_(value)
         , exit_(false)
     {}
+    evented_counter_t(const evented_counter_t &src) = delete;
+    evented_counter_t(evented_counter_t &&src) = delete;
+    virtual ~evented_counter_t() {}
 
     size_t get() const noexcept
     {
