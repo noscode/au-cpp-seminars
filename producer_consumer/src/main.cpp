@@ -41,6 +41,7 @@ struct evented_counter_t
 
     size_t inc() noexcept
     {
+        std::unique_lock<std::mutex> lock(value_wait_mutex_);
         size_t old_value = value_.fetch_add(1);
         value_wait_cond_.notify_all();
         return old_value + 1;
@@ -48,6 +49,7 @@ struct evented_counter_t
 
     size_t dec() noexcept
     {
+        std::unique_lock<std::mutex> lock(value_wait_mutex_);
         size_t old_value = value_.fetch_sub(1);
         value_wait_cond_.notify_all();
         return old_value - 1;
