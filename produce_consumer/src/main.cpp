@@ -7,6 +7,7 @@
 #include <cstring>
 #include <cassert>
 
+// TODO rename to notifying_counter_t
 struct evented_counter_t
 {
     explicit evented_counter_t(size_t value)
@@ -31,6 +32,7 @@ struct evented_counter_t
      * Then you can call destructor of this object.
      * Yep. This interface is bad.
      */
+    // TODO make convenient simple interface for this
     void exit() noexcept
     {
         exit_.store(true);
@@ -67,10 +69,14 @@ private:
 
 struct write_info_t
 {
+    // TODO return true in buf_destroyed if evented_buffer_t
+    // is going to be destroyed
+    bool buf_destroyed;
     size_t offset;
     size_t size;
 };
 
+// TODO rename to notifying_buffer_t
 struct evented_buffer_t
 {
     explicit evented_buffer_t(size_t size);
@@ -286,6 +292,7 @@ static void run_evented_buffer()
     writer_thread.join();
     finish.store(true);
     // last readers wakeup
+    // TODO make convenient interface for this
     evbuf.write(0, 0, nullptr);
 
     for (size_t i = 0; i < NUM_READERS; ++i)
