@@ -4,10 +4,10 @@ int main()
 {
     using namespace std;
     float sum = 0.0f;
-    int count = 0;
+    size_t count = 0;
 
-    cout << "Type the number please" << endl;
-    while (true) {
+    cout << "Type 5 numbers please" << endl;
+    while (count < 5) {
         float num = 0.0f;
         cin >> num;
         if (cin.fail() || cin.eof())
