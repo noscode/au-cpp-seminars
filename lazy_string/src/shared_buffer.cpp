@@ -17,8 +17,6 @@ shared_buffer::shared_buffer(size_t data_size)
     const size_t shared_size = sizeof(*shared_) - prealloced_data_size + data_size;
 
     shared_ = (shared*)malloc(shared_size);
-    //TODO check for nullptr
-    //TODO use new with right alignment
     memset(shared_, 0, shared_size);
 
     shared_->size_ = data_size;
