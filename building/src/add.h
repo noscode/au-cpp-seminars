@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-int sum(int, int);
+int add(int, int);
 
 #ifdef __cplusplus
 }
