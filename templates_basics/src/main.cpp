@@ -139,11 +139,6 @@ struct priority_queue
         vec_.pop_back();
     }
 
-    T& front()
-    {
-        return vec_[0];
-    }
-
     const T& front() const
     {
         return vec_[0];
